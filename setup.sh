@@ -33,7 +33,7 @@ if_exists_bak() {
 install_tmux_completion() {
     tmux -V > /dev/null 2>&1 || exit 1
     curl "https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/tmux.completion.bash" |\
-	    sed '1,10 s/^/#/' |\
+	    sed '1,10 s/^/#/' \
 		> "${DOTFILES}/tmux.completion.bash"
 }
 
