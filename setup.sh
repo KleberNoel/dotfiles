@@ -1,4 +1,5 @@
 #!/bin/bash
+DOTFILES="$(dirname "$(realpath "$0")")"
 
 if_exists_bak() {
     if [[ ! -L "${1}" && -f "${1}" ]]; then
@@ -31,8 +32,9 @@ if_exists_bak() {
 
 install_tmux_completion() {
     tmux -V > /dev/null 2>&1 || exit 1
-    curl -o $HOME/.dotfiles/tmux.completion.bash \
-        "https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/tmux.completion.bash"
+    curl "https://raw.githubusercontent.com/Bash-it/bash-it/master/completion/available/tmux.completion.bash" |\
+	    sed '1,10 s/^/#/' \
+		> "${DOTFILES}/tmux.completion.bash"
 }
 
 
@@ -107,7 +109,6 @@ install_gruvbox() {
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # If this is being used as a script (e.g. `$ ./setup.sh`)
-    DOTFILES="$(dirname "$(realpath "$0")")"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     export PATH="$HOME/homebrew/bin:$PATH"
