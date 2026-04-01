@@ -36,14 +36,6 @@ PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
 # activate colors
 export TERM=xterm-256color
 
-if which nvim >/dev/null; then
-    export EDITOR="nvim" && export VISUAL="nvim"
-elif which vim >/dev/null; then
-    export EDITOR="vim" && export VISUAL="vim"
-elif which nano >/dev/null; then
-    export EDITOR="nano" && export VISUAL="nano"
-fi
-
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
@@ -124,12 +116,6 @@ for file in $(ls -1 "$HOME/.bash_functions"); do
 done
 # <<< custom functions <<<
 
-# >>> alias definitions >>>
-if [ -f "$HOME/.bash_aliases" ]; then
-    . "$HOME/.bash_aliases"
-fi
-# <<< alias definitions <<<
-
 # >>> conda initialize >>>
 # Attempt finding first path found below root, with maxdepth=2 by default.
 # Miniconda could be in a larger storage position (but it is usually kept close to root).
@@ -165,7 +151,7 @@ fi
 # <<< env files <<<
 
 # fnm
-FNM_PATH="/home/k/.local/share/fnm"
+FNM_PATH="$HOME/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
   export PATH="$FNM_PATH:$PATH"
   eval "`fnm env`"
@@ -179,23 +165,34 @@ if [ -d "/home/linuxbrew/.linuxbrew/bin" ]; then
   export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 fi
 
-if [ -f "$HOME/.dotfiles/tmux.completion.bash" ]; then
-  source "$HOME/.dotfiles/tmux.completion.bash"
+for bash_file in $(find "$HOME/.dotfiles" -iname "*.bash" -type f); do
+  if [ -f "$bash_file" ]; then
+    source "$bash_file"
+  fi
+done
+
+if [ -z $EDITOR ]; then  # (Requires linuxbrew or nvim / vim / vi to be in PATH)
+  if which nvim >/dev/null; then
+      export EDITOR="nvim" && export VISUAL="nvim"
+  elif which vim >/dev/null; then
+      export EDITOR="vim" && export VISUAL="vim"
+  elif which vi >/dev/null; then
+      export EDITOR="vi" && export VISUAL="vi"
+  fi
 fi
 
-if [ -f "$HOME/.dotfiles/conda.completion.bash" ]; then
-  source "$HOME/.dotfiles/conda.completion.bash"
+# >>> alias definitions >>> (Requires EDITOR)
+if [ -f "$HOME/.bash_aliases" ]; then
+    . "$HOME/.bash_aliases"
 fi
+# <<< alias definitions <<<
 
-if [ -f "$HOME/.dotfiles/fzf/shell/key-bindings.bash" ]; then
-  source "$HOME/.dotfiles/fzf/shell/key-bindings.bash"
-fi
-
-if [ -f "$HOME/.dotfiles/fzf/shell/completion.bash" ]; then
-  source "$HOME/.dotfiles/fzf/shell/completion.bash"
-fi
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-[ -d ~/.fzf ] && [ -d $HOME/.dotfiles/fzf-git.sh ] && source "$HOME/.dotfiles/fzf-git.sh/fzf-git.sh"
 
 which kubectl >/dev/null && alias k=kubectl
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# opencode
+export PATH=/home/kleber/.opencode/bin:$PATH

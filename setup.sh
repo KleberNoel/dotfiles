@@ -82,13 +82,14 @@ create_pynvim_conda_env() {
         check_decision "$human_readable_message" "$_command" || check_decision "$human_readable_message" "sudo ${_command}"
     fi
 
-    if [ -d "${environment_location}/$(grep "name:" ./pynvim-env.yaml | awk '{print $2}')" ]; then
-        conda env create -f pynvim-env.yaml -n pynvim
+    PYNVIM_ENV_YAML="./vimrc/pynvim-env.yaml"
+    if [ -d "${environment_location}/$(grep "name:" "${PYNVIM_ENV_YAML}" | awk '{print $2}')" ]; then
+        conda env create -f "${PYNVIM_ENV_YAML}" -n pynvim
     else
         echo "* Assuming pynvim conda env already exists..."
-        environment_location=$(conda env create -f pynvim-env.yaml -n pynvim 2>&1 | grep -v "^$" | sed 's/.*exists: //g')
+        environment_location=$(conda env create -f "${PYNVIM_ENV_YAML}" -n pynvim 2>&1 | grep -v "^$" | sed 's/.*exists: //g')
         [ -n "$environment_location" ] && echo "* Found $environment_location" || echo "No conda environment location found"
-        conda env update -f pynvim-env.yaml --prune
+        conda env update -f "${PYNVIM_ENV_YAML}" --prune
     fi
     export CONDA_PYNVIM_ENV_PYTHON_PATH="$environment_location/bin/python3"
 }
@@ -135,5 +136,23 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         # Symlink neovim config submodule (at ~/.dotfiles/.gitmodules )
         ln -s "$DOTFILES/vimrc" "$HOME/.config/nvim"
     fi
+    create_pynvim_conda_env
+
+    # Symlink agent skills to all discovery paths
+    # Source of truth: ~/.dotfiles/skills/<name>/SKILL.md
+    # Targets: ~/.config/opencode/skills/, ~/.claude/skills/, ~/.agents/skills/
+    if [ -d "$DOTFILES/skills" ]; then
+        for skills_target in "$HOME/.config/opencode/skills" "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+            mkdir -p "$skills_target"
+            for skill_dir in "$DOTFILES/skills"/*/; do
+                skill_name=$(basename "$skill_dir")
+                if [ ! -L "$skills_target/$skill_name" ]; then
+                    ln -sv "$DOTFILES/skills/$skill_name" "$skills_target/$skill_name"
+                fi
+            done
+        done
+        echo "* Agent skills symlinked to opencode, claude, and agents discovery paths"
+    fi
+
     echo "Tip: Go to https://www.nerdfonts.com/font-downloads and download a nerdfont with glyphs for neovim"
 fi

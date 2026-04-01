@@ -3,3 +3,4 @@ Miniconda3-latest-*.sh
 fzf.bash
 *.completion.bash
 Gruvbox.itermcolors
+code-agents

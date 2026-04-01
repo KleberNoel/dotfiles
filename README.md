@@ -11,7 +11,7 @@ git clone --recurse-submodules "https://github.com/klebster2/dotfiles" ~/.dotfil
 Then run:
 
 ```bash
-pushd ~/.dotfiles && ./setup.sh && popd
+cd ~/.dotfiles && ./setup.sh && cd -
 ```
 
 # MacOS
